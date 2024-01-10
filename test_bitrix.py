@@ -125,6 +125,20 @@ def get_composite_data(session, target):
     data['bitrix_sessid'] = d['bitrix_sessid']
     return data
 
+# custom session class to slow down requests and bypass rate limits
+class DelayedSession(requests.Session):
+    def __init__(self, delay_seconds=0, *args, **kwargs):
+        super(DelayedSession, self).__init__(*args, **kwargs)
+        self.delay_seconds = delay_seconds
+
+    def request(self, method, url, *args, **kwargs):
+        # make a request as usual
+        response = super(DelayedSession, self).request(method, url, *args, **kwargs)
+
+        # add an arbitrary timeout between requests
+        time.sleep(self.delay_seconds)
+
+        return response
 
 class Scanner:
     __admin_url_list = [
@@ -1094,6 +1108,7 @@ def main():
     # Common ------------------------------------------------------------------------------
     parser.add_argument("-t", '--target', help='target url (example: https://target.com)', required=True)
     parser.add_argument("-x", '--proxy', metavar="proxy", help='URL proxy (example: http://127.0.0.1:8080)')
+    parser.add_argument("-rt", '--rate', metavar="rate", help='Delay between requests in ms (example: 500)')
     subparser = parser.add_subparsers(dest='subcommand')
     subparser.required = True
 
@@ -1169,7 +1184,12 @@ def main():
         if ssrf_url[-1] != '/':
             ssrf_url += '/'
 
-    session = requests.Session()
+    if args.rate:
+        session = DelayedSession()
+        session.delay_seconds = int(args.rate) / 1000 # convert to seconds for time.sleep()
+    else:
+        session = requests.Session()
+
     session.headers.update(headers)
 
     if args.proxy:

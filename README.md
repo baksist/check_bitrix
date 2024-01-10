@@ -65,7 +65,7 @@ python3 test_bitrix.py -h
 This will display help for the tool
 
 ```console
-usage: python3 test_bitrix.py [-h] -t TARGET [-x proxy] {scan,rce_vote,vote_phar,vote_htaccess,object_injection,tmp_file_create} ...
+usage: python3 test_bitrix.py [-h] -t TARGET [-x proxy] [-rt rate] {scan,rce_vote,vote_phar,vote_htaccess,object_injection,tmp_file_create} ...
 
 positional arguments:
   {scan,rce_vote,vote_phar,vote_htaccess,object_injection,tmp_file_create}
@@ -83,6 +83,8 @@ options:
                         target url (example: https://target.com) (default: None)
   -x proxy, --proxy proxy
                         URL proxy (example: http://127.0.0.1:8080) (default: None)
+  -rt rate, --rate rate
+                        Delay between requests in ms (example: 500) (default: None)
 ```
 
 ### Running scan mode
